@@ -1,7 +1,7 @@
 # netlify.toml
 [build]
   base = "socchain/packages/nextjs"
-  publish = "socchain/packages/nextjs/.next"
+  publish = ".next"
   command = "yarn install && yarn build"
 
 [build.environment]
