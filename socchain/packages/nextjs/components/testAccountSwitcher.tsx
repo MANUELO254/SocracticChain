@@ -1,17 +1,18 @@
 // socchain/packages/nextjs/components/TestAccountSwitcher.tsx
 "use client";
 
-import React, { useState } from 'react';
-import { useAccount } from 'wagmi';
-import { Users, X, Copy, Check, ExternalLink } from 'lucide-react';
-import { TEST_ACCOUNTS, getAccountByAddress } from 'utils/testAccounts';
+import React, { useState } from "react";
+import { Check, Copy, ExternalLink, Users, X } from "lucide-react";
+import { useAccount } from "wagmi";
+
+import { TEST_ACCOUNTS, getAccountByAddress } from "utils/testAccounts";
 
 export default function TestAccountSwitcher() {
   const [isOpen, setIsOpen] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const { address } = useAccount();
 
-  const currentAccount = getAccountByAddress(address || '');
+  const currentAccount = getAccountByAddress(address || "");
 
   const handleCopyPrivateKey = async (privateKey: string, index: number) => {
     await navigator.clipboard.writeText(privateKey);
@@ -22,21 +23,20 @@ export default function TestAccountSwitcher() {
   const handleImportToMetaMask = (privateKey: string, role: string) => {
     alert(
       `📋 Steps to Import "${role}" to MetaMask:\n\n` +
-      `1. Click MetaMask extension\n` +
-      `2. Click account icon (top right)\n` +
-      `3. Click "Add account or hardware wallet"\n` +
-      `4. Select "Import account"\n` +
-      `5. Paste this private key:\n\n${privateKey}\n\n` +
-      `6. Click "Import"\n\n` +
-      `✅ Make sure you're on OP Sepolia network!`
+        `1. Click MetaMask extension\n` +
+        `2. Click account icon (top right)\n` +
+        `3. Click "Add account or hardware wallet"\n` +
+        `4. Select "Import account"\n` +
+        `5. Paste this private key:\n\n${privateKey}\n\n` +
+        `6. Click "Import"\n\n` +
+        `✅ Make sure you&apos;re on OP Sepolia network!`,
     );
     handleCopyPrivateKey(privateKey, -1);
   };
 
   // Only show in development or testnet
-  const isTestEnvironment = 
-    process.env.NODE_ENV === 'development' || 
-    process.env.NEXT_PUBLIC_CHAIN_ID === '11155420'; // OP Sepolia
+  const isTestEnvironment =
+    process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_CHAIN_ID === "11155420"; // OP Sepolia
 
   if (!isTestEnvironment) return null;
 
@@ -56,7 +56,9 @@ export default function TestAccountSwitcher() {
         <div className="fixed bottom-20 right-4 bg-white rounded-lg shadow-lg p-3 z-50 border-2 border-purple-200">
           <div className="text-xs text-slate-500 mb-1">Active Test Account:</div>
           <div className="font-semibold text-purple-700 text-sm">{currentAccount.role}</div>
-          <div className="text-xs font-mono text-slate-600">{address?.slice(0, 6)}...{address?.slice(-4)}</div>
+          <div className="text-xs font-mono text-slate-600">
+            {address?.slice(0, 6)}...{address?.slice(-4)}
+          </div>
         </div>
       )}
 
@@ -70,8 +72,8 @@ export default function TestAccountSwitcher() {
                 <h2 className="text-2xl font-bold mb-1">Test Account Manager</h2>
                 <p className="text-purple-100 text-sm">Switch between Anvil test accounts on OP Sepolia</p>
               </div>
-              <button 
-                onClick={() => setIsOpen(false)} 
+              <button
+                onClick={() => setIsOpen(false)}
                 className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
               >
                 <X className="w-6 h-6" />
@@ -104,10 +106,14 @@ export default function TestAccountSwitcher() {
                   <div>
                     <p className="text-sm font-semibold text-amber-900 mb-1">Testing Accounts Only</p>
                     <ul className="text-xs text-amber-800 space-y-1">
-                      <li>✓ These are Anvil's well-known test accounts</li>
+                      <li>✓ These are Anvil&apos;s well-known test accounts</li>
                       <li>✓ Safe to use on OP Sepolia testnet</li>
-                      <li>✗ <strong>NEVER</strong> use these private keys on mainnet</li>
-                      <li>✗ <strong>DO NOT</strong> send real funds to these addresses</li>
+                      <li>
+                        ✗ <strong>NEVER</strong> use these private keys on mainnet
+                      </li>
+                      <li>
+                        ✗ <strong>DO NOT</strong> send real funds to these addresses
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -120,7 +126,7 @@ export default function TestAccountSwitcher() {
                   Quick Setup Guide
                 </h3>
                 <ol className="text-sm text-indigo-800 space-y-1 list-decimal list-inside">
-                  <li>Click "Import to MetaMask" on any account below</li>
+                  <li>Click &quot;Import to MetaMask&quot; on any account below</li>
                   <li>Follow the popup instructions to import the account</li>
                   <li>Switch to that account in MetaMask</li>
                   <li>Refresh this page to see the change</li>
@@ -131,34 +137,32 @@ export default function TestAccountSwitcher() {
               {/* Account Grid */}
               <div className="space-y-3">
                 <h3 className="font-semibold text-slate-800 text-lg mb-3">Available Test Accounts</h3>
-                
+
                 {TEST_ACCOUNTS.map((account, index) => {
                   const isActive = address?.toLowerCase() === account.address.toLowerCase();
-                  
+
                   return (
                     <div
                       key={account.address}
                       className={`p-4 border-2 rounded-xl transition-all ${
                         isActive
-                          ? 'border-purple-500 bg-purple-50 shadow-lg'
-                          : 'border-slate-200 hover:border-indigo-300 hover:shadow-md'
+                          ? "border-purple-500 bg-purple-50 shadow-lg"
+                          : "border-slate-200 hover:border-indigo-300 hover:shadow-md"
                       }`}
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-bold text-slate-700">
-                              #{index}
-                            </span>
-                            <span className={`text-sm font-semibold ${
-                              isActive ? 'text-purple-700' : 'text-slate-800'
-                            }`}>
+                            <span className="text-sm font-bold text-slate-700">#{index}</span>
+                            <span
+                              className={`text-sm font-semibold ${
+                                isActive ? "text-purple-700" : "text-slate-800"
+                              }`}
+                            >
                               {account.role}
                             </span>
                             {isActive && (
-                              <span className="px-2 py-0.5 bg-purple-500 text-white text-xs rounded-full">
-                                Active
-                              </span>
+                              <span className="px-2 py-0.5 bg-purple-500 text-white text-xs rounded-full">Active</span>
                             )}
                           </div>
                           <p className="text-xs text-slate-600 mb-2">{account.description}</p>
@@ -197,9 +201,7 @@ export default function TestAccountSwitcher() {
                           Show Private Key
                         </summary>
                         <div className="mt-2 p-2 bg-slate-900 rounded-lg">
-                          <p className="text-xs font-mono text-green-400 break-all">
-                            {account.privateKey}
-                          </p>
+                          <p className="text-xs font-mono text-green-400 break-all">{account.privateKey}</p>
                         </div>
                       </details>
                     </div>
@@ -210,7 +212,8 @@ export default function TestAccountSwitcher() {
               {/* Network Reminder */}
               <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  <strong>📡 Network:</strong> Make sure MetaMask is set to <strong>OP Sepolia</strong> testnet before importing accounts!
+                  <strong>📡 Network:</strong> Make sure MetaMask is set to <strong>OP Sepolia</strong> testnet before
+                  importing accounts!
                 </p>
               </div>
             </div>

@@ -159,13 +159,6 @@ export default function NominationHub() {
     args: address ? [address] : undefined,
   });
 
-  const { data: activeCandidates } = useReadContract({
-    address: CANDIDACY_ADDRESS,
-    abi: CANDIDACY_ABI,
-    functionName: "getActiveCandidatesForElection",
-    args: [BigInt(electionId)],
-  });
-
   const { data: profile } = useReadContract({
     address: CANDIDACY_ADDRESS,
     abi: CANDIDACY_ABI,

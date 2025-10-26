@@ -11,10 +11,8 @@ import {
   AlertCircle,
   Award,
   CheckCircle,
-  Hash,
   Loader2,
   Play,
-  Settings,
   Shield,
   Users,
   Vote,
@@ -375,27 +373,27 @@ export default function AdminDashboard() {
   const isAlreadyMember = typedMemberCheck && typedMemberCheck.member !== "0x0000000000000000000000000000000000000000";
   const isAlreadyWhitelisted = typedMemberCheck && typedMemberCheck.isWhitelisted === true;
 
-  const { writeContract: writeNomElection, data: nomHash, isPending: isCreatingNom } = useWriteContract();
-  const { writeContract: writeFinalizeNom, data: finalizeNomHash, isPending: isFinalizingNom } = useWriteContract();
-  const { writeContract: writeVettingSession, data: vettingHash, isPending: isCreatingVetting } = useWriteContract();
-  const { writeContract: writeRequestJury, data: juryHash, isPending: isRequestingJury } = useWriteContract();
-  const { writeContract: writeFinalizeVetting, data: finalizeVettingHash, isPending: isFinalizingVetting } = useWriteContract();
-  const { writeContract: writeLotteryElection, data: lotteryHash, isPending: isCreatingLottery } = useWriteContract();
-  const { writeContract: writeRequestDraw, data: drawHash, isPending: isRequestingDraw } = useWriteContract();
-  const { writeContract: writeSetWhitelist, data: setStatusHash, isPending: isSettingStatus } = useWriteContract();
-  const { writeContract: writeGrantVetting, data: grantHash, isPending: isGranting } = useWriteContract();
-  const { writeContract: writeDisqualify, data: disqualifyHash, isPending: isDisqualifying } = useWriteContract();
+  const { writeContract: writeNomElection, isPending: isCreatingNom } = useWriteContract();
+  const { writeContract: writeFinalizeNom, isPending: isFinalizingNom } = useWriteContract();
+  const { writeContract: writeVettingSession, isPending: isCreatingVetting } = useWriteContract();
+  const { writeContract: writeRequestJury, isPending: isRequestingJury } = useWriteContract();
+  const { writeContract: writeFinalizeVetting, isPending: isFinalizingVetting } = useWriteContract();
+  const { writeContract: writeLotteryElection, isPending: isCreatingLottery } = useWriteContract();
+  const { writeContract: writeRequestDraw, isPending: isRequestingDraw } = useWriteContract();
+  const { writeContract: writeSetWhitelist, isPending: isSettingStatus } = useWriteContract();
+  const { writeContract: writeGrantVetting, isPending: isGranting } = useWriteContract();
+  const { writeContract: writeDisqualify, isPending: isDisqualifying } = useWriteContract();
 
-  const { isSuccess: nomSuccess } = useWaitForTransactionReceipt({ hash: nomHash });
-  const { isSuccess: finalizeNomSuccess } = useWaitForTransactionReceipt({ hash: finalizeNomHash });
-  const { isSuccess: vettingSuccess } = useWaitForTransactionReceipt({ hash: vettingHash });
-  const { isSuccess: jurySuccess } = useWaitForTransactionReceipt({ hash: juryHash });
-  const { isSuccess: finalizeVettingSuccess } = useWaitForTransactionReceipt({ hash: finalizeVettingHash });
-  const { isSuccess: lotterySuccess } = useWaitForTransactionReceipt({ hash: lotteryHash });
-  const { isSuccess: drawSuccess } = useWaitForTransactionReceipt({ hash: drawHash });
-  const { isSuccess: statusSuccess } = useWaitForTransactionReceipt({ hash: setStatusHash });
-  const { isSuccess: grantSuccess } = useWaitForTransactionReceipt({ hash: grantHash });
-  const { isSuccess: disqualifySuccess } = useWaitForTransactionReceipt({ hash: disqualifyHash });
+  const { isSuccess: nomSuccess } = useWaitForTransactionReceipt();
+  const { isSuccess: finalizeNomSuccess } = useWaitForTransactionReceipt();
+  const { isSuccess: vettingSuccess } = useWaitForTransactionReceipt();
+  const { isSuccess: jurySuccess } = useWaitForTransactionReceipt();
+  const { isSuccess: finalizeVettingSuccess } = useWaitForTransactionReceipt();
+  const { isSuccess: lotterySuccess } = useWaitForTransactionReceipt();
+  const { isSuccess: drawSuccess } = useWaitForTransactionReceipt();
+  const { isSuccess: statusSuccess } = useWaitForTransactionReceipt();
+  const { isSuccess: grantSuccess } = useWaitForTransactionReceipt();
+  const { isSuccess: disqualifySuccess } = useWaitForTransactionReceipt();
 
   const handleCreateNomination = () => {
     if (!nomStart || !nomEnd) {

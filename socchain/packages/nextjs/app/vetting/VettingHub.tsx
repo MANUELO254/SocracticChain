@@ -8,23 +8,17 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
   useConnect,
-  useDisconnect,
   useSwitchChain,
 } from "wagmi";
-import { injected } from "wagmi/connectors";
 import {
   AlertCircle,
   CheckCircle,
   Clock,
-  Eye,
-  FileText,
-  Hash,
   Loader2,
   Lock,
   Shield,
   Unlock,
   Users,
-  XCircle,
 } from "lucide-react";
 import { parseEther, keccak256, encodePacked, toHex } from "viem";
 import { generatePrivateKey } from "viem/accounts";

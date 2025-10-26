@@ -1,8 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
-import { AlertCircle, Award, CheckCircle, Coins, Loader2, Plus, Shield, TrendingUp, User, Users } from "lucide-react";
+import {
+  useAccount,
+  useReadContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import {
+  AlertCircle,
+  Award,
+  CheckCircle,
+  Coins,
+  Loader2,
+  Plus,
+  Shield,
+  User,
+  Users,
+} from "lucide-react";
 import { parseEther } from "viem";
 
 const IDENTITY_ADDRESS = "0x59d37399B778729d4B52aBf68Ee5D3deA62De277";
@@ -189,10 +204,12 @@ export default function IdentityHub() {
                 </div>
                 <div>
                   <span className="text-sm text-slate-600">Attestations</span>
-                  <div className="font-semibold text-slate-800">{(attestations as Attestation[] | undefined)?.length || 0}</div>
+                  <div className="font-semibold text-slate-800">
+                    {(attestations as Attestation[] | undefined)?.length || 0}
+                  </div>
                 </div>
                 <div>
-                  <span className="text-sm text-slate-600">Registered</span>
+                  <span className="text-sm text-slate-600">Registered since</span>
                   <div className="font-semibold text-slate-800">{formatTimestamp(typedIdentity.registeredAt)}</div>
                 </div>
                 <div>
@@ -235,7 +252,7 @@ export default function IdentityHub() {
               type="text"
               placeholder="Enter your Passport ID"
               value={passportId}
-              onChange={(e) => setPassportId(e.target.value)}
+              onChange={e => setPassportId(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg"
             />
           </div>
@@ -266,7 +283,7 @@ export default function IdentityHub() {
               type="text"
               placeholder="0x..."
               value={attestTo}
-              onChange={(e) => setAttestTo(e.target.value)}
+              onChange={e => setAttestTo(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg"
             />
           </div>
@@ -275,7 +292,7 @@ export default function IdentityHub() {
             <textarea
               placeholder="Write your attestation message"
               value={attestMessage}
-              onChange={(e) => setAttestMessage(e.target.value)}
+              onChange={e => setAttestMessage(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg h-24"
             />
           </div>
@@ -295,7 +312,9 @@ export default function IdentityHub() {
 
       {attestations && (attestations as Attestation[]).length > 0 && (
         <div className="bg-white rounded-xl shadow-md p-6">
-          <h3 className="font-semibold text-slate-800 mb-4">Attestations Received ({(attestations as Attestation[]).length})</h3>
+          <h3 className="font-semibold text-slate-800 mb-4">
+            Attestations Received ({(attestations as Attestation[]).length})
+          </h3>
           <div className="space-y-3">
             {(attestations as Attestation[]).map((att, idx) => (
               <div key={idx} className="p-4 border border-slate-200 rounded-lg">
@@ -335,7 +354,9 @@ export default function IdentityHub() {
               <Shield className="w-6 h-6 text-indigo-600" />
               <div>
                 <p className="font-semibold text-indigo-900">Identity Verified</p>
-                <p className="text-sm text-indigo-700">Registered since {formatTimestamp(typedIdentity.registeredAt)}</p>
+                <p className="text-sm text-indigo-700">
+                  Registered since {formatTimestamp(typedIdentity.registeredAt)}
+                </p>
               </div>
             </div>
           </div>
@@ -347,7 +368,7 @@ export default function IdentityHub() {
               { id: "overview", label: "Overview" },
               { id: "register", label: "Register" },
               { id: "attest", label: "Attestations" },
-            ].map((tab) => (
+            ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
