@@ -1,38 +1,355 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useConnect, useDisconnect, useSwitchChain } from 'wagmi';
-import { injected } from 'wagmi/connectors';
-import { Shield, Users, Lock, Unlock, CheckCircle, AlertCircle, Clock, Eye, Hash, Loader2, FileText, XCircle } from 'lucide-react';
-import { parseEther, keccak256, encodePacked, toHex } from 'viem';
-import { generatePrivateKey } from 'viem/accounts'; // For random secret generation
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  useAccount,
+  useReadContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+  useConnect,
+  useDisconnect,
+  useSwitchChain,
+} from "wagmi";
+import { injected } from "wagmi/connectors";
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Eye,
+  FileText,
+  Hash,
+  Loader2,
+  Lock,
+  Shield,
+  Unlock,
+  Users,
+  XCircle,
+} from "lucide-react";
+import { parseEther, keccak256, encodePacked, toHex } from "viem";
+import { generatePrivateKey } from "viem/accounts"; // For random secret generation
 
-const VETTING_ADDRESS = '0xf67260ed2Bf33c9Dc819c247EF9dc61Cef55D834';
+const VETTING_ADDRESS = "0xf67260ed2Bf33c9Dc819c247EF9dc61Cef55D834";
 const VETTING_ABI = [
-  {"inputs": [{"internalType": "uint256","name": "_sessionId","type": "uint256"}],"name": "getVettingSession","outputs": [{"internalType": "uint256","name": "electionId","type": "uint256"},{"internalType": "uint256[]","name": "candidateIds","type": "uint256[]"},{"internalType": "address[]","name": "jurors","type": "address[]"},{"internalType": "uint96","name": "commitStart","type": "uint96"},{"internalType": "uint96","name": "commitEnd","type": "uint96"},{"internalType": "uint96","name": "revealEnd","type": "uint96"},{"internalType": "bool","name": "isFinalized","type": "bool"},{"internalType": "enum VettingJury.SessionPhase","name": "currentPhase","type": "uint8"}],"stateMutability": "view","type": "function"},
-  {"inputs": [{"internalType": "uint256","name": "_sessionId","type": "uint256"},{"internalType": "address","name": "_address","type": "address"}],"name": "isJuror","outputs": [{"internalType": "bool","name": "","type": "bool"}],"stateMutability": "view","type": "function"},
-  {"inputs": [{"internalType": "uint256","name": "_sessionId","type": "uint256"}],"name": "stakeAsJuror","outputs": [],"stateMutability": "payable","type": "function"},
-  {"inputs": [{"internalType": "uint256","name": "_sessionId","type": "uint256"},{"internalType": "uint256","name": "_candidateId","type": "uint256"},{"internalType": "bytes32","name": "_commitHash","type": "bytes32"}],"name": "commitVote","outputs": [],"stateMutability": "nonpayable","type": "function"},
-  {"inputs": [{"internalType": "uint256","name": "_sessionId","type": "uint256"},{"internalType": "uint256","name": "_candidateId","type": "uint256"},{"internalType": "bool","name": "_approve","type": "bool"},{"internalType": "string","name": "_evidenceIPFS","type": "string"},{"internalType": "string","name": "_findingsSummary","type": "string"},{"internalType": "string","name": "_secret","type": "string"}],"name": "revealVote","outputs": [],"stateMutability": "nonpayable","type": "function"},
-  {"inputs": [{"internalType": "uint256","name": "_sessionId","type": "uint256"},{"internalType": "uint256","name": "_candidateId","type": "uint256"}],"name": "getVettingResults","outputs": [{"internalType": "uint256","name": "approvals","type": "uint256"},{"internalType": "uint256","name": "rejections","type": "uint256"},{"internalType": "uint256","name": "totalReveals","type": "uint256"},{"internalType": "uint256","name": "approvalPercentage","type": "uint256"}],"stateMutability": "view","type": "function"},
-  {"inputs": [{"internalType": "uint256","name": "_sessionId","type": "uint256"},{"internalType": "uint256","name": "_candidateId","type": "uint256"}],"name": "getAllJurorReports","outputs": [{"components": [{"internalType": "address","name": "juror","type": "address"},{"internalType": "bool","name": "approve","type": "bool"},{"internalType": "string","name": "evidenceIPFS","type": "string"},{"internalType": "string","name": "findingsSummary","type": "string"},{"internalType": "uint96","name": "revealedAt","type": "uint96"},{"internalType": "bool","name": "hasRevealed","type": "bool"}],"internalType": "struct VettingJury.JurorReport[]","name": "","type": "tuple[]"}],"stateMutability": "view","type": "function"},
-  {"inputs": [{"internalType": "uint256","name": "_sessionId","type": "uint256"},{"internalType": "uint256","name": "_candidateId","type": "uint256"},{"internalType": "address","name": "_juror","type": "address"}],"name": "hasCommitted","outputs": [{"internalType": "bool","name": "","type": "bool"}],"stateMutability": "view","type": "function"},
-  {"inputs": [{"internalType": "uint256","name": "_sessionId","type": "uint256"},{"internalType": "uint256","name": "_candidateId","type": "uint256"},{"internalType": "address","name": "_juror","type": "address"}],"name": "hasRevealed","outputs": [{"internalType": "bool","name": "","type": "bool"}],"stateMutability": "view","type": "function"}
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_sessionId",
+        type: "uint256",
+      },
+    ],
+    name: "getVettingSession",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "electionId",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256[]",
+        name: "candidateIds",
+        type: "uint256[]",
+      },
+      {
+        internalType: "address[]",
+        name: "jurors",
+        type: "address[]",
+      },
+      {
+        internalType: "uint96",
+        name: "commitStart",
+        type: "uint96",
+      },
+      {
+        internalType: "uint96",
+        name: "commitEnd",
+        type: "uint96",
+      },
+      {
+        internalType: "uint96",
+        name: "revealEnd",
+        type: "uint96",
+      },
+      {
+        internalType: "bool",
+        name: "isFinalized",
+        type: "bool",
+      },
+      {
+        internalType: "enum VettingJury.SessionPhase",
+        name: "currentPhase",
+        type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_sessionId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_address",
+        type: "address",
+      },
+    ],
+    name: "isJuror",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_sessionId",
+        type: "uint256",
+      },
+    ],
+    name: "stakeAsJuror",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_sessionId",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_candidateId",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes32",
+        name: "_commitHash",
+        type: "bytes32",
+      },
+    ],
+    name: "commitVote",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_sessionId",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_candidateId",
+        type: "uint256",
+      },
+      {
+        internalType: "bool",
+        name: "_approve",
+        type: "bool",
+      },
+      {
+        internalType: "string",
+        name: "_evidenceIPFS",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_findingsSummary",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_secret",
+        type: "string",
+      },
+    ],
+    name: "revealVote",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_sessionId",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_candidateId",
+        type: "uint256",
+      },
+    ],
+    name: "getVettingResults",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "approvals",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "rejections",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "totalReveals",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "approvalPercentage",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_sessionId",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_candidateId",
+        type: "uint256",
+      },
+    ],
+    name: "getAllJurorReports",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "juror",
+            type: "address",
+          },
+          {
+            internalType: "bool",
+            name: "approve",
+            type: "bool",
+          },
+          {
+            internalType: "string",
+            name: "evidenceIPFS",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "findingsSummary",
+            type: "string",
+          },
+          {
+            internalType: "uint96",
+            name: "revealedAt",
+            type: "uint96",
+          },
+          {
+            internalType: "bool",
+            name: "hasRevealed",
+            type: "bool",
+          },
+        ],
+        internalType: "struct VettingJury.JurorReport[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_sessionId",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_candidateId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_juror",
+        type: "address",
+      },
+    ],
+    name: "hasCommitted",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_sessionId",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_candidateId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_juror",
+        type: "address",
+      },
+    ],
+    name: "hasRevealed",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
 ];
 
-const PHASE_NAMES = ['Jury Selection', 'Commit', 'Reveal', 'Finalized'];
+const PHASE_NAMES = ["Jury Selection", "Commit", "Reveal", "Finalized"];
 
 export default function VettingHub() {
   const { address } = useAccount();
   const [sessionId, setSessionId] = useState(1);
   const [candidateId, setCandidateId] = useState(1);
-  const [commitHash, setCommitHash] = useState('');
+  const [commitHash, setCommitHash] = useState("");
   const [approve, setApprove] = useState(true);
-  const [evidenceIPFS, setEvidenceIPFS] = useState('');
-  const [findingsSummary, setFindingsSummary] = useState('');
-  const [secret, setSecret] = useState('');
-  const [stakeAmount, setStakeAmount] = useState('0.01');
+  const [evidenceIPFS, setEvidenceIPFS] = useState("");
+  const [findingsSummary, setFindingsSummary] = useState("");
+  const [secret, setSecret] = useState("");
+  const [stakeAmount, setStakeAmount] = useState("0.01");
   const [isGenerating, setIsGenerating] = useState(false);
 
   const { connect, connectors, error: connectError, isPending: connectPending } = useConnect();
@@ -42,42 +359,42 @@ export default function VettingHub() {
   const { data: sessionData } = useReadContract({
     address: VETTING_ADDRESS,
     abi: VETTING_ABI,
-    functionName: 'getVettingSession',
+    functionName: "getVettingSession",
     args: [BigInt(sessionId)],
   });
 
   const { data: isJuror } = useReadContract({
     address: VETTING_ADDRESS,
     abi: VETTING_ABI,
-    functionName: 'isJuror',
+    functionName: "isJuror",
     args: [BigInt(sessionId), address],
   });
 
   const { data: hasCommitted } = useReadContract({
     address: VETTING_ADDRESS,
     abi: VETTING_ABI,
-    functionName: 'hasCommitted',
+    functionName: "hasCommitted",
     args: [BigInt(sessionId), BigInt(candidateId), address],
   });
 
   const { data: hasRevealed } = useReadContract({
     address: VETTING_ADDRESS,
     abi: VETTING_ABI,
-    functionName: 'hasRevealed',
+    functionName: "hasRevealed",
     args: [BigInt(sessionId), BigInt(candidateId), address],
   });
 
   const { data: vettingResults } = useReadContract({
     address: VETTING_ADDRESS,
     abi: VETTING_ABI,
-    functionName: 'getVettingResults',
+    functionName: "getVettingResults",
     args: [BigInt(sessionId), BigInt(candidateId)],
   });
 
   const { data: jurorReports } = useReadContract({
     address: VETTING_ADDRESS,
     abi: VETTING_ABI,
-    functionName: 'getAllJurorReports',
+    functionName: "getAllJurorReports",
     args: [BigInt(sessionId), BigInt(candidateId)],
   });
 
@@ -122,26 +439,26 @@ export default function VettingHub() {
     if (session?.currentPhase === 2 && !hasRevealed) {
       loadCommitData();
     }
-  }, [session?.currentPhase, candidateId, address, hasRevealed]);
+  }, [session?.currentPhase, candidateId, address, hasRevealed, loadCommitData]);
 
   const handleConnect = async (connector: any) => {
     try {
       await switchChain({ chainId: 11155420 });
       connect({ connector });
     } catch (e) {
-      console.error('Connect failed:', e);
+      console.error("Connect failed:", e);
     }
   };
 
   const handleStake = () => {
     if (parseFloat(stakeAmount) < 0.001) {
-      alert('Minimum stake is 0.001 ETH');
+      alert("Minimum stake is 0.001 ETH");
       return;
     }
     writeStake({
       address: VETTING_ADDRESS,
       abi: VETTING_ABI,
-      functionName: 'stakeAsJuror',
+      functionName: "stakeAsJuror",
       args: [BigInt(sessionId)],
       value: parseEther(stakeAmount),
     });
@@ -156,7 +473,7 @@ export default function VettingHub() {
       const secretStr = toHex(privateKey.slice(1)); // Remove 0x and use as string
 
       // Compute hash: keccak256(abi.encodePacked(_approve, _secret, msg.sender))
-      const packed = encodePacked(['bool', 'string', 'address'], [approve, secretStr, address as `0x${string}`]);
+      const packed = encodePacked(["bool", "string", "address"], [approve, secretStr, address as `0x${string}`]);
       const hash = keccak256(packed);
 
       setSecret(secretStr);
@@ -167,39 +484,39 @@ export default function VettingHub() {
       writeCommit({
         address: VETTING_ADDRESS,
         abi: VETTING_ABI,
-        functionName: 'commitVote',
+        functionName: "commitVote",
         args: [BigInt(sessionId), BigInt(candidateId), hash as `0x${string}`],
       });
     } catch (error) {
-      console.error('Generation failed:', error);
-      alert('Failed to generate commit. Please try again.');
+      console.error("Generation failed:", error);
+      alert("Failed to generate commit. Please try again.");
     } finally {
       setIsGenerating(false);
     }
   };
 
   const handleCommit = () => {
-    if (!commitHash.startsWith('0x') || commitHash.length !== 66) {
-      alert('Invalid commit hash format. Use the "Generate & Commit" button instead.');
+    if (!commitHash.startsWith("0x") || commitHash.length !== 66) {
+      alert("Invalid commit hash format. Use the \"Generate & Commit\" button instead.");
       return;
     }
     writeCommit({
       address: VETTING_ADDRESS,
       abi: VETTING_ABI,
-      functionName: 'commitVote',
+      functionName: "commitVote",
       args: [BigInt(sessionId), BigInt(candidateId), commitHash as `0x${string}`],
     });
   };
 
   const handleReveal = () => {
     if (!secret) {
-      alert('No secret found. You must have committed first.');
+      alert("No secret found. You must have committed first.");
       return;
     }
     writeReveal({
       address: VETTING_ADDRESS,
       abi: VETTING_ABI,
-      functionName: 'revealVote',
+      functionName: "revealVote",
       args: [BigInt(sessionId), BigInt(candidateId), approve, evidenceIPFS, findingsSummary, secret],
     });
   };
@@ -332,9 +649,13 @@ export default function VettingHub() {
                   className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2"
                 >
                   {isStaking ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" />Staking...</>
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />Staking...
+                    </>
                   ) : (
-                    <><Lock className="w-4 h-4" />Stake {stakeAmount} ETH</>
+                    <>
+                      <Lock className="w-4 h-4" />Stake {stakeAmount} ETH
+                    </>
                   )}
                 </button>
               </div>
@@ -375,7 +696,7 @@ export default function VettingHub() {
                             type="radio"
                             value="true"
                             checked={approve}
-                            onChange={(e) => setApprove(e.target.value === 'true')}
+                            onChange={(e) => setApprove(e.target.value === "true")}
                             className="rounded"
                           />
                           <span className="text-green-600 font-medium">✅ Proceed (Approve)</span>
@@ -387,7 +708,7 @@ export default function VettingHub() {
                             type="radio"
                             value="false"
                             checked={!approve}
-                            onChange={(e) => setApprove(e.target.value === 'true')}
+                            onChange={(e) => setApprove(e.target.value === "true")}
                             className="rounded"
                           />
                           <span className="text-red-600 font-medium">❌ Disqualify (Reject)</span>
@@ -403,11 +724,17 @@ export default function VettingHub() {
                     className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-slate-400 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2"
                   >
                     {isGenerating || isCommitting ? (
-                      <><Loader2 className="w-4 h-4 animate-spin" />{isGenerating ? 'Generating...' : 'Committing...'}</>
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />{isGenerating ? "Generating..." : "Committing..."}
+                      </>
                     ) : hasCommitted ? (
-                      <><CheckCircle className="w-4 h-4" />Already Committed</>
+                      <>
+                        <CheckCircle className="w-4 h-4" />Already Committed
+                      </>
                     ) : (
-                      <><Lock className="w-4 h-4" />Generate Secret & Commit Vote</>
+                      <>
+                        <Lock className="w-4 h-4" />Generate Secret & Commit Vote
+                      </>
                     )}
                   </button>
 
@@ -444,9 +771,9 @@ export default function VettingHub() {
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Confirm Your Decision (Auto-loaded from Commit)</label>
                     <div className="space-y-2">
-                      <div className={`flex items-center gap-2 p-2 rounded-lg ${approve ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-                        <span className={`text-lg ${approve ? 'text-green-600' : 'text-red-600'}`}>
-                          {approve ? '✅ Proceed (Approve)' : '❌ Disqualify (Reject)'}
+                      <div className={`flex items-center gap-2 p-2 rounded-lg ${approve ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}>
+                        <span className={`text-lg ${approve ? "text-green-600" : "text-red-600"}`}>
+                          {approve ? "✅ Proceed (Approve)" : "❌ Disqualify (Reject)"}
                         </span>
                         <p className="text-xs text-slate-500">This matches your private commitment. Change only if error.</p>
                       </div>
@@ -485,7 +812,7 @@ export default function VettingHub() {
                   </div>
 
                   <div className="text-xs text-slate-500 bg-slate-100 p-2 rounded">
-                    <strong>Secret:</strong> {secret ? `${secret.slice(0, 10)}...${secret.slice(-10)} (Auto-loaded & Hidden)` : 'No secret found—commit first!'}
+                    <strong>Secret:</strong> {secret ? `${secret.slice(0, 10)}...${secret.slice(-10)} (Auto-loaded & Hidden)` : "No secret found—commit first!"}
                   </div>
 
                   <button
@@ -494,11 +821,17 @@ export default function VettingHub() {
                     className="w-full bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2"
                   >
                     {isRevealing ? (
-                      <><Loader2 className="w-4 h-4 animate-spin" />Revealing...</>
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />Revealing...
+                      </>
                     ) : hasRevealed ? (
-                      <><CheckCircle className="w-4 h-4" />Already Revealed</>
+                      <>
+                        <CheckCircle className="w-4 h-4" />Already Revealed
+                      </>
                     ) : (
-                      <><Unlock className="w-4 h-4" />Reveal Vote & Share Findings</>
+                      <>
+                        <Unlock className="w-4 h-4" />Reveal Vote & Share Findings
+                      </>
                     )}
                   </button>
 
@@ -555,11 +888,11 @@ export default function VettingHub() {
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       report.hasRevealed 
                         ? report.approve 
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
-                        : 'bg-gray-100 text-gray-600'
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                        : "bg-gray-100 text-gray-600"
                     }`}>
-                      {report.hasRevealed ? (report.approve ? 'Approved' : 'Rejected') : 'Not Revealed'}
+                      {report.hasRevealed ? (report.approve ? "Approved" : "Rejected") : "Not Revealed"}
                     </span>
                   </div>
                   {report.hasRevealed && (

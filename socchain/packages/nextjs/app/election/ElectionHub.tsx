@@ -11,7 +11,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { useAccount, useReadContract } from "wagmi";
+import { useReadContract } from "wagmi";
 
 const LOTTERY_ADDRESS = "0xaeCF00cfa7479527ec47Aa3D68E11AE206C4bC98";
 const LOTTERY_ABI = [

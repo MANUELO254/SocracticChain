@@ -10,11 +10,13 @@ import {
 import identityAbiJson from "../../contracts/abis/IdentityRegistry.json";
 import {
   AlertCircle,
+  Award,
   CheckCircle,
   Coins,
   Loader2,
   Plus,
   Shield,
+  TrendingUp,
   User,
   Users,
 } from "lucide-react";

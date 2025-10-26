@@ -8,10 +8,12 @@ import {
   CheckCircle,
   Hash,
   Loader2,
+  Play,
   Settings,
   Shield,
   Users,
   Vote,
+  XCircle,
 } from "lucide-react";
 import { parseEther } from "viem";
 
@@ -890,7 +892,7 @@ export default function AdminDashboard() {
             { num: 5, title: "Create Vetting Session", desc: "Set up jury review (adds automatic 5min VRF buffer)" },
             { num: 6, title: "Request Jury Selection (VRF)", desc: "Randomly select jurors - DO THIS IMMEDIATELY!" },
             { num: 7, title: "Selected Jurors Stake (Public)", desc: "Only selected jurors can stake on /vetting page" },
-            { num: 8, title: "Jurors Commit &amp; Reveal", desc: "Commit &amp; reveal votes on /vetting page" },
+            { num: 8, title: "Jurors Commit & Reveal", desc: "Commit & reveal votes on /vetting page" },
             { num: 9, title: "Finalize Vetting", desc: "Complete jury review, approve/reject candidates" },
             { num: 10, title: "Create Lottery Election", desc: "Set voting period for final winner" },
             { num: 11, title: "Community Votes (Public)", desc: "Members vote on /election page" },
@@ -1235,7 +1237,7 @@ export default function AdminDashboard() {
             </li>
             <li>Wait 1-2 minutes for VRF completion</li>
             <li>Selected jurors stake on /vetting page</li>
-            <li>Commit &amp; reveal phases complete</li>
+            <li>Commit & reveal phases complete</li>
             <li>Finalize to approve/reject candidates</li>
           </ol>
         </div>
@@ -1542,7 +1544,7 @@ export default function AdminDashboard() {
                     <div>
                       <div className="font-semibold text-yellow-100">⚠️ No Jurors Selected Yet</div>
                       <div className="text-sm text-yellow-200 mt-1">
-                        Click &quot;Request Jury Selection&quot; in Vetting tab to trigger VRF.
+                        Click "Request Jury Selection" in Vetting tab to trigger VRF.
                       </div>
                     </div>
                   </div>
@@ -1820,7 +1822,7 @@ export default function AdminDashboard() {
               { id: "nominations", label: "Nominations", icon: Vote },
               { id: "vetting", label: "Vetting", icon: Shield },
               { id: "lottery", label: "Lottery", icon: Award },
-              { id: "identity", label: "Identity &amp; Config", icon: Users },
+              { id: "identity", label: "Identity & Config", icon: Users },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
