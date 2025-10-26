@@ -1,9 +1,12 @@
 # netlify.toml
 [build]
   base = "socchain/packages/nextjs"
-  publish = ".next"
+  publish = "socchain/packages/nextjs/.next"
   command = "yarn install && yarn build"
 
 [build.environment]
   NODE_VERSION = "20.18.3"
   YARN_VERSION = "3.2.3"
+
+[[plugins]]
+  package = "@netlify/next"
