@@ -12,3 +12,16 @@ docs/
 
 # Dotenv file
 .env
+
+# Excluded Solidity scripts and mock files
+src/MockIdentityRegistry.sol
+script/VerifyNFTMinting.s.sol
+script/DeployVettingJury.s.sol
+script/DeployCandidacyNFT.s.sol
+script/DeployAndMint.s.sol
+
+# ScaffoldEth (socchain) foundry script exclusions
+socchain/packages/foundry/script/DeployAndMint.s.sol
+socchain/packages/foundry/script/DeployCandidacyNFT.s.sol
+socchain/packages/foundry/script/DeployVettingJury.s.sol
+socchain/packages/foundry/script/VerifyNFTMinting.s.sol

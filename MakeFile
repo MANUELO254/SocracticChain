@@ -1,0 +1,117 @@
+# Makefile for DDSP Governance Deployment
+
+-include .env
+
+.PHONY: help build test clean deploy-local deploy-sepolia deploy-op-sepolia deploy-full-local
+
+# Default target
+help:
+	@echo "Available commands:"
+	@echo "  make build                    - Build all contracts"
+	@echo "  make test                     - Run all tests"
+	@echo "  make clean                    - Clean build artifacts"
+	@echo ""
+	@echo "Deployment commands:"
+	@echo "  make deploy-local             - Deploy to local Anvil (basic)"
+	@echo "  make deploy-local-testing     - Deploy to local Anvil with test users"
+	@echo "  make deploy-local-sample      - Deploy to local Anvil with sample data"
+	@echo "  make deploy-local-full        - Deploy to local Anvil with full simulation"
+	@echo ""
+	@echo "  make deploy-sepolia           - Deploy to Ethereum Sepolia"
+	@echo "  make deploy-op-sepolia        - Deploy to Optimism Sepolia (RECOMMENDED for Gitcoin)"
+	@echo ""
+	@echo "Verification commands:"
+	@echo "  make verify-sepolia           - Verify contracts on Ethereum Sepolia"
+	@echo "  make verify-op-sepolia        - Verify contracts on Optimism Sepolia"
+
+# Build
+build:
+	forge build
+
+# Test
+test:
+	forge test
+
+# Clean
+clean:
+	forge clean
+
+# Local deployments (no verification needed)
+deploy-local:
+	@echo "Deploying to local Anvil..."
+	forge script script/DeployGoverance.s.sol:DeployGovernance --rpc-url http://localhost:8545 --broadcast
+
+deploy-local-testing:
+	@echo "Deploying to local Anvil with test users..."
+	forge script script/DeployGoverance.s.sol:DeployForTesting --rpc-url http://localhost:8545 --broadcast
+
+deploy-local-sample:
+	@echo "Deploying to local Anvil with sample data..."
+	forge script script/DeployGoverance.s.sol:DeployWithSampleData --rpc-url http://localhost:8545 --broadcast
+
+deploy-local-full:
+	@echo "Deploying to local Anvil with full simulation..."
+	forge script script/DeployGoverance.s.sol:DeployFullSimulation --rpc-url http://localhost:8545 --broadcast
+
+# Ethereum Sepolia deployment
+deploy-sepolia:
+	@echo "⚠️  WARNING: Gitcoin Passport is NOT natively supported on Ethereum Sepolia"
+	@echo "Consider using Optimism Sepolia instead (make deploy-op-sepolia)"
+	@echo ""
+	@read -p "Continue anyway? [y/N] " confirm; \
+	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
+		forge script script/DeployGoverance.s.sol:DeployGovernance \
+			--rpc-url $(SEPOLIA_RPC_URL) \
+			--account default \
+			--broadcast \
+			--verify \
+			--etherscan-api-key $(ETHERSCAN_API_KEY) \
+			-vvvv; \
+	fi
+
+# Optimism Sepolia deployment (RECOMMENDED)
+deploy-op-sepolia:
+	@echo "✅ Deploying to Optimism Sepolia (Gitcoin Passport supported)"
+	forge script script/DeployGoverance.s.sol:DeployGovernance \
+		--rpc-url $(OP_SEPOLIA_RPC_URL) \
+		--account default \
+		--broadcast \
+		--verify \
+		--etherscan-api-key $(OP_ETHERSCAN_API_KEY) \
+		-vvvv
+
+# Deploy with testing setup (for testnets)
+deploy-op-sepolia-testing:
+	@echo "✅ Deploying to Optimism Sepolia with test user setup"
+	forge script script/DeployGoverance.s.sol:DeployForTesting \
+		--rpc-url $(OP_SEPOLIA_RPC_URL) \
+		--account default \
+		--broadcast \
+		--verify \
+		--etherscan-api-key $(OP_ETHERSCAN_API_KEY) \
+		-vvvv
+
+# Verification commands (if deployment didn't auto-verify)
+verify-sepolia:
+	@echo "Manual verification for Ethereum Sepolia"
+	@echo "You'll need to run forge verify-contract for each deployed address"
+
+verify-op-sepolia:
+	@echo "Manual verification for Optimism Sepolia"
+	@echo "You'll need to run forge verify-contract for each deployed address"
+
+# Start local Anvil node
+anvil:
+	anvil
+
+# Format code
+format:
+	forge fmt
+
+# Gas snapshot
+snapshot:
+	forge snapshot
+
+# Coverage
+coverage:
+	forge coverage

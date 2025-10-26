@@ -1,8 +1,25 @@
 [profile.default]
 src = "src"
 out = "out"
+solc_version = "0.8.30"
+optimizer = true
+optimizer_runs = 9999
+via_ir = true
+
 libs = ["lib"]
 
-remappings = ['@openzeppelin/contracts=lib/openzeppelin-contracts/contracts']
+
+remappings = [
+  '@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/',
+  '@openzeppelin/contracts=lib/openzeppelin-contracts/contracts/',
+  '@pythnetwork/pyth-sdk-solidity/=lib/pyth-sdk-solidity/',
+]
+
+fs_permissions = [
+    { access = "read", path = "./broadcast" },
+    { access = "read", path = "./reports" },
+]
+
+
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
