@@ -1,31 +1,136 @@
 "use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useAccount, useReadContract } from 'wagmi';
-import { Crown, Users, Clock, BarChart3, TrendingUp, Award, Loader2 } from 'lucide-react';
+import React, { useState } from "react";
+import Link from "next/link";
+import {
+  Award,
+  BarChart3,
+  Clock,
+  Crown,
+  Loader2,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import { useAccount, useReadContract } from "wagmi";
 
-const LOTTERY_ADDRESS = '0xaeCF00cfa7479527ec47Aa3D68E11AE206C4bC98';
+const LOTTERY_ADDRESS = "0xaeCF00cfa7479527ec47Aa3D68E11AE206C4bC98";
 const LOTTERY_ABI = [
-  {"inputs": [{"internalType": "uint256","name": "_electionId","type": "uint256"}],"name": "getElection","outputs": [{"internalType": "uint256","name": "vettingSessionId","type": "uint256"},{"internalType": "uint256[]","name": "candidateIds","type": "uint256[]"},{"internalType": "uint96","name": "votingStart","type": "uint96"},{"internalType": "uint96","name": "votingEnd","type": "uint96"},{"internalType": "bool","name": "isFinalized","type": "bool"},{"internalType": "uint256","name": "winner","type": "uint256"},{"internalType": "uint256","name": "totalVotes","type": "uint256"},{"internalType": "uint256","name": "totalWeight","type": "uint256"}],"stateMutability": "view","type": "function"},
-  {"inputs": [{"internalType": "uint256","name": "_electionId","type": "uint256"}],"name": "getVoteDistribution","outputs": [{"components": [{"internalType": "uint256","name": "candidateId","type": "uint256"},{"internalType": "address","name": "candidateAddress","type": "address"},{"internalType": "string","name": "platformSummary","type": "string"},{"internalType": "uint256","name": "voteWeight","type": "uint256"},{"internalType": "uint256","name": "probabilityBasisPoints","type": "uint256"}],"internalType": "struct WeightedLottery.VoteDistribution[]","name": "","type": "tuple[]"}],"stateMutability": "view","type": "function"}
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_electionId",
+        type: "uint256",
+      },
+    ],
+    name: "getElection",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "vettingSessionId",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256[]",
+        name: "candidateIds",
+        type: "uint256[]",
+      },
+      {
+        internalType: "uint96",
+        name: "votingStart",
+        type: "uint96",
+      },
+      {
+        internalType: "uint96",
+        name: "votingEnd",
+        type: "uint96",
+      },
+      {
+        internalType: "bool",
+        name: "isFinalized",
+        type: "bool",
+      },
+      {
+        internalType: "uint256",
+        name: "winner",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "totalVotes",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "totalWeight",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_electionId",
+        type: "uint256",
+      },
+    ],
+    name: "getVoteDistribution",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "candidateId",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "candidateAddress",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "platformSummary",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "voteWeight",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "probabilityBasisPoints",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct WeightedLottery.VoteDistribution[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
 ];
 
 export default function ElectionHub() {
-  const { address } = useAccount();
   const [electionId, setElectionId] = useState(1);
 
   const { data: electionData, isLoading } = useReadContract({
     address: LOTTERY_ADDRESS,
     abi: LOTTERY_ABI,
-    functionName: 'getElection',
+    functionName: "getElection",
     args: [BigInt(electionId)],
   });
 
   const { data: voteDistribution } = useReadContract({
     address: LOTTERY_ADDRESS,
     abi: LOTTERY_ABI,
-    functionName: 'getVoteDistribution',
+    functionName: "getVoteDistribution",
     args: [BigInt(electionId)],
   });
 
@@ -40,31 +145,41 @@ export default function ElectionHub() {
     );
   }
 
-  const election = electionData ? {
-    vettingSessionId: Number(electionData[0]),
-    candidateIds: electionData[1].map((id: bigint) => Number(id)),
-    votingStart: Number(electionData[2]),
-    votingEnd: Number(electionData[3]),
-    isFinalized: electionData[4],
-    winner: Number(electionData[5]),
-    totalVotes: Number(electionData[6]),
-    totalWeight: Number(electionData[7]),
-  } : null;
+  const election = electionData
+    ? {
+        vettingSessionId: Number(electionData[0]),
+        candidateIds: electionData[1].map((id: bigint) => Number(id)),
+        votingStart: Number(electionData[2]),
+        votingEnd: Number(electionData[3]),
+        isFinalized: electionData[4],
+        winner: Number(electionData[5]),
+        totalVotes: Number(electionData[6]),
+        totalWeight: Number(electionData[7]),
+      }
+    : null;
 
   const now = Math.floor(Date.now() / 1000);
-  const timeLeft = election && election.votingEnd > now 
-    ? Math.floor((election.votingEnd - now) / 3600) + 'h'
-    : 'Ended';
+  const timeLeft =
+    election && election.votingEnd > now
+      ? Math.floor((election.votingEnd - now) / 3600) + "h"
+      : "Ended";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 py-12">
       <div className="container mx-auto px-4">
         <div className="mb-8">
-          <Link href="/vetting" className="inline-flex items-center gap-2 text-slate-600 hover:text-indigo-600 mb-4">
+          <Link
+            href="/vetting"
+            className="inline-flex items-center gap-2 text-slate-600 hover:text-indigo-600 mb-4"
+          >
             ← Back to Vetting
           </Link>
-          <h1 className="text-4xl font-bold text-slate-800 mb-2">Weighted Lottery Election</h1>
-          <p className="text-slate-600">Winner selected randomly based on nomination weights</p>
+          <h1 className="text-4xl font-bold text-slate-800 mb-2">
+            Weighted Lottery Election
+          </h1>
+          <p className="text-slate-600">
+            Winner selected randomly based on nomination weights
+          </p>
         </div>
 
         {election && (
@@ -74,11 +189,13 @@ export default function ElectionHub() {
                 <Crown className="w-8 h-8 text-indigo-600" />
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-slate-800 mb-2">Election #{electionId}</h3>
+                <h3 className="text-2xl font-bold text-slate-800 mb-2">
+                  Election #{electionId}
+                </h3>
                 <p className="text-slate-600 mb-2">
-                  {election.isFinalized 
-                    ? 'Winner has been selected via weighted random draw'
-                    : 'Random selection based on nomination counts from vetting phase'}
+                  {election.isFinalized
+                    ? "Winner has been selected via weighted random draw"
+                    : "Random selection based on nomination counts from vetting phase"}
                 </p>
                 <div className="flex items-center gap-4 text-sm text-slate-500">
                   <div className="flex items-center gap-1">
@@ -95,11 +212,15 @@ export default function ElectionHub() {
 
             <div className="grid grid-cols-3 gap-6 text-center">
               <div>
-                <div className="text-3xl font-bold text-indigo-600">{election.candidateIds.length}</div>
+                <div className="text-3xl font-bold text-indigo-600">
+                  {election.candidateIds.length}
+                </div>
                 <div className="text-sm text-slate-600">Vetted Candidates</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-indigo-600">{election.totalWeight}</div>
+                <div className="text-3xl font-bold text-indigo-600">
+                  {election.totalWeight}
+                </div>
                 <div className="text-sm text-slate-600">Total Weight</div>
               </div>
               <div>
@@ -118,8 +239,12 @@ export default function ElectionHub() {
                   <Crown className="w-12 h-12 text-yellow-600" />
                   <div>
                     <h4 className="text-2xl font-bold text-yellow-900">Winner Selected!</h4>
-                    <p className="text-yellow-800 text-lg font-semibold">Candidate #{election.winner}</p>
-                    <p className="text-yellow-700 text-sm">Selected via provably fair VRF random draw</p>
+                    <p className="text-yellow-800 text-lg font-semibold">
+                      Candidate #{election.winner}
+                    </p>
+                    <p className="text-yellow-700 text-sm">
+                      Selected via provably fair VRF random draw
+                    </p>
                   </div>
                 </div>
               </div>
@@ -130,45 +255,66 @@ export default function ElectionHub() {
         <div className="bg-white rounded-xl shadow-md p-6 mb-8">
           <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-indigo-600" />
-            Vote Distribution & Probabilities
+            Vote Distribution &amp; Probabilities
           </h3>
           <p className="text-sm text-slate-600 mb-4">
-            Each candidate's probability is weighted by their nomination count from the community voting phase.
+            Each candidate&apos;s probability is weighted by their nomination count from the community voting phase.
           </p>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b-2 border-slate-200">
-                  <th className="text-left py-3 px-4 font-medium text-slate-700">Candidate</th>
-                  <th className="text-left py-3 px-4 font-medium text-slate-700">Address</th>
-                  <th className="text-left py-3 px-4 font-medium text-slate-700">Platform</th>
-                  <th className="text-left py-3 px-4 font-medium text-slate-700">Weight</th>
-                  <th className="text-left py-3 px-4 font-medium text-slate-700">Probability</th>
-                  <th className="text-left py-3 px-4 font-medium text-slate-700">Status</th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-700">
+                    Candidate
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-700">
+                    Address
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-700">
+                    Platform
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-700">
+                    Weight
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-700">
+                    Probability
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-700">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {voteDistribution && voteDistribution.length > 0 ? (
                   voteDistribution.map((dist: any, idx: number) => {
-                    const isWinner = election?.isFinalized && Number(dist.candidateId) === election.winner;
-                    const probability = (Number(dist.probabilityBasisPoints) / 100).toFixed(2);
-                    
+                    const isWinner =
+                      election?.isFinalized &&
+                      Number(dist.candidateId) === election.winner;
+                    const probability = (
+                      Number(dist.probabilityBasisPoints) / 100
+                    ).toFixed(2);
+
                     return (
-                      <tr 
-                        key={idx} 
+                      <tr
+                        key={idx}
                         className={`border-b border-slate-100 hover:bg-slate-50 ${
-                          isWinner ? 'bg-yellow-50' : ''
+                          isWinner ? "bg-yellow-50" : ""
                         }`}
                       >
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
-                            {isWinner && <Crown className="w-4 h-4 text-yellow-600" />}
-                            <span className="font-bold text-slate-800">#{dist.candidateId.toString()}</span>
+                            {isWinner && (
+                              <Crown className="w-4 h-4 text-yellow-600" />
+                            )}
+                            <span className="font-bold text-slate-800">
+                              #{dist.candidateId.toString()}
+                            </span>
                           </div>
                         </td>
                         <td className="py-3 px-4 text-slate-600 font-mono text-xs">
-                          {dist.candidateAddress.slice(0, 6)}...{dist.candidateAddress.slice(-4)}
+                          {dist.candidateAddress.slice(0, 6)}...
+                          {dist.candidateAddress.slice(-4)}
                         </td>
                         <td className="py-3 px-4 text-slate-600 max-w-xs truncate">
                           {dist.platformSummary}
@@ -184,7 +330,7 @@ export default function ElectionHub() {
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
                             <div className="flex-1 bg-slate-200 rounded-full h-2 max-w-[100px]">
-                              <div 
+                              <div
                                 className="bg-indigo-600 h-2 rounded-full"
                                 style={{ width: `${probability}%` }}
                               />

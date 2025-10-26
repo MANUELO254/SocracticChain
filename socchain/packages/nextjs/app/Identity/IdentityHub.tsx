@@ -1,83 +1,99 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import identityAbiJson from '../../contracts/abis/IdentityRegistry.json';
-import { 
-  User, Shield, Coins, CheckCircle, AlertCircle, TrendingUp, Users, Award, 
-  ExternalLink, Plus, Loader2
-} from 'lucide-react';
+import React, { useState } from "react";
+import {
+  useAccount,
+  useReadContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import identityAbiJson from "../../contracts/abis/IdentityRegistry.json";
+import {
+  AlertCircle,
+  CheckCircle,
+  Coins,
+  Loader2,
+  Plus,
+  Shield,
+  User,
+  Users,
+} from "lucide-react";
 
-const IDENTITY_REGISTRY_ADDRESS = '0x59d37399B778729d4B52aBf68Ee5D3deA62De277';
+const IDENTITY_REGISTRY_ADDRESS = "0x59d37399B778729d4B52aBf68Ee5D3deA62De277";
 const identityAbi = identityAbiJson.abi;
 
 export default function IdentityHub() {
   const { address: connectedAddress } = useAccount();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [stakeAmount, setStakeAmount] = useState('0.01');
-  const [attesteeAddress, setAttesteeAddress] = useState('');
-  const [attestationEvidence, setAttestationEvidence] = useState('');
+  const [activeTab, setActiveTab] = useState("overview");
+  const [stakeAmount, setStakeAmount] = useState("0.01");
+  const [attesteeAddress, setAttesteeAddress] = useState("");
+  const [attestationEvidence, setAttestationEvidence] = useState("");
 
   // Fetch user identity
   const { data: identityData, isLoading: loadingIdentity } = useReadContract({
     address: IDENTITY_REGISTRY_ADDRESS,
     abi: identityAbi,
-    functionName: 'getIdentity',
+    functionName: "getIdentity",
     args: [connectedAddress],
-    query: { enabled: !!connectedAddress }
+    query: { enabled: !!connectedAddress },
   });
 
   // Fetch eligibility statuses
   const { data: isEligibleVoter } = useReadContract({
     address: IDENTITY_REGISTRY_ADDRESS,
     abi: identityAbi,
-    functionName: 'isEligibleVoter',
+    functionName: "isEligibleVoter",
     args: [connectedAddress],
-    query: { enabled: !!connectedAddress }
+    query: { enabled: !!connectedAddress },
   });
 
   const { data: isEligibleCandidate } = useReadContract({
     address: IDENTITY_REGISTRY_ADDRESS,
     abi: identityAbi,
-    functionName: 'isEligibleCandidate',
+    functionName: "isEligibleCandidate",
     args: [connectedAddress],
-    query: { enabled: !!connectedAddress }
+    query: { enabled: !!connectedAddress },
   });
 
   const { data: isEligibleJuror } = useReadContract({
     address: IDENTITY_REGISTRY_ADDRESS,
     abi: identityAbi,
-    functionName: 'isEligibleJuror',
+    functionName: "isEligibleJuror",
     args: [connectedAddress],
-    query: { enabled: !!connectedAddress }
+    query: { enabled: !!connectedAddress },
   });
 
   // Fetch attestations
   const { data: attestations } = useReadContract({
     address: IDENTITY_REGISTRY_ADDRESS,
     abi: identityAbi,
-    functionName: 'getAttestations',
+    functionName: "getAttestations",
     args: [connectedAddress],
-    query: { enabled: !!connectedAddress }
+    query: { enabled: !!connectedAddress },
   });
 
   // Write functions
   const { writeContract: writeStake, data: stakeHash } = useWriteContract();
-  const { writeContract: writeAttestation, data: attestHash } = useWriteContract();
-  
-  const { isPending: isStaking } = useWaitForTransactionReceipt({ hash: stakeHash });
-  const { isPending: isAttesting, isSuccess: attestSuccess } = useWaitForTransactionReceipt({ hash: attestHash });
+  const { writeContract: writeAttestation, data: attestHash } =
+    useWriteContract();
 
-  const isRegistered = identityData && identityData[0] !== '0x0000000000000000000000000000000000000000';
+  const { isPending: isStaking } = useWaitForTransactionReceipt({
+    hash: stakeHash,
+  });
+  const { isPending: isAttesting, isSuccess: attestSuccess } =
+    useWaitForTransactionReceipt({ hash: attestHash });
+
+  const isRegistered =
+    identityData && identityData[0] !== "0x0000000000000000000000000000000000000000";
 
   const handleIncreaseStake = async () => {
     if (!stakeAmount) return;
     writeStake({
       address: IDENTITY_REGISTRY_ADDRESS,
       abi: identityAbi,
-      functionName: 'increaseStake',
+      functionName: "increaseStake",
       args: [[]],
-      value: BigInt(Math.floor(parseFloat(stakeAmount) * 1e18))
+      value: BigInt(Math.floor(parseFloat(stakeAmount) * 1e18)),
     });
   };
 
@@ -86,23 +102,26 @@ export default function IdentityHub() {
     writeAttestation({
       address: IDENTITY_REGISTRY_ADDRESS,
       abi: identityAbi,
-      functionName: 'createAttestation',
-      args: [attesteeAddress as `0x${string}`, attestationEvidence]
+      functionName: "createAttestation",
+      args: [attesteeAddress as `0x${string}`, attestationEvidence],
     });
   };
 
   const formatTimestamp = (timestamp: bigint | undefined): string => {
-    if (!timestamp || Number(timestamp) === 0) return '—';
+    if (!timestamp || Number(timestamp) === 0) return "—";
     const date = new Date(Number(timestamp) * 1000);
     return date.toLocaleDateString();
   };
 
   const formatEth = (wei: bigint | undefined): string => {
-    if (!wei) return '0.0000';
+    if (!wei) return "0.0000";
     return (Number(wei) / 1e18).toFixed(4);
   };
 
-  const safeNumber = (value: bigint | undefined | number, fallback = 0): number => {
+  const safeNumber = (
+    value: bigint | undefined | number,
+    fallback = 0
+  ): number => {
     return value ? Number(value) : fallback;
   };
 
@@ -113,7 +132,9 @@ export default function IdentityHub() {
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Shield className="w-8 h-8 text-blue-600" />
           </div>
-          <h2 className="text-3xl font-bold text-slate-800 mb-2">Register Your Identity</h2>
+          <h2 className="text-3xl font-bold text-slate-800 mb-2">
+            Register Your Identity
+          </h2>
           <p className="text-slate-600">Connect your wallet and stake to join</p>
         </div>
 
@@ -123,7 +144,10 @@ export default function IdentityHub() {
               <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-amber-800">
                 <p className="font-medium mb-1">Gitcoin Passport Integration Required</p>
-                <p>Full registration requires Gitcoin Passport score verification. For demo purposes, use the admin whitelist function or contact an admin.</p>
+                <p>
+                  Full registration requires Gitcoin Passport score verification. For demo purposes, use the admin
+                  whitelist function or contact an admin.
+                </p>
               </div>
             </div>
           </div>
@@ -148,7 +172,9 @@ export default function IdentityHub() {
 
           {!connectedAddress && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
-              <p className="text-yellow-800 font-medium">Please connect your wallet to continue</p>
+              <p className="text-yellow-800 font-medium">
+                Please connect your wallet to continue
+              </p>
             </div>
           )}
         </div>
@@ -173,7 +199,9 @@ export default function IdentityHub() {
           <div className="bg-white rounded-xl shadow-md p-6">
             <div className="flex items-center justify-between mb-2">
               <Shield className="w-5 h-5 text-blue-600" />
-              <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">Score</span>
+              <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                Score
+              </span>
             </div>
             <div className="text-2xl font-bold text-slate-800">{passportScore}</div>
             <div className="text-xs text-slate-600">Passport Score</div>
@@ -182,7 +210,9 @@ export default function IdentityHub() {
           <div className="bg-white rounded-xl shadow-md p-6">
             <div className="flex items-center justify-between mb-2">
               <Coins className="w-5 h-5 text-amber-500" />
-              <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded">Active</span>
+              <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded">
+                Active
+              </span>
             </div>
             <div className="text-2xl font-bold text-slate-800">{stakeAmountEth} ETH</div>
             <div className="text-xs text-slate-600">Staked Amount</div>
@@ -209,9 +239,9 @@ export default function IdentityHub() {
           <h3 className="font-semibold text-slate-800 mb-4">Eligibility Status</h3>
           <div className="space-y-3">
             {[
-              { label: 'Voter Eligible', value: isEligibleVoter, link: '/nominations' },
-              { label: 'Candidate Eligible', value: isEligibleCandidate, link: '/nominations' },
-              { label: 'Juror Eligible', value: isEligibleJuror }
+              { label: "Voter Eligible", value: isEligibleVoter, link: "/nominations" },
+              { label: "Candidate Eligible", value: isEligibleCandidate, link: "/nominations" },
+              { label: "Juror Eligible", value: isEligibleJuror },
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                 <span className="text-slate-700">{item.label}</span>
@@ -244,8 +274,12 @@ export default function IdentityHub() {
             </div>
             <div className="flex justify-between">
               <span className="text-slate-600">Whitelisted:</span>
-              <span className={`font-medium ${isWhitelisted ? 'text-green-600' : 'text-slate-500'}`}>
-                {isWhitelisted ? 'Yes' : 'No'}
+              <span
+                className={`font-medium ${
+                  isWhitelisted ? "text-green-600" : "text-slate-500"
+                }`}
+              >
+                {isWhitelisted ? "Yes" : "No"}
               </span>
             </div>
           </div>
@@ -263,7 +297,9 @@ export default function IdentityHub() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-slate-600 mb-1">Current Stake</div>
-                <div className="text-3xl font-bold text-slate-800">{formatEth(identityData[6])} ETH</div>
+                <div className="text-3xl font-bold text-slate-800">
+                  {formatEth(identityData[6])} ETH
+                </div>
               </div>
               <Coins className="w-12 h-12 text-amber-500" />
             </div>
@@ -272,22 +308,25 @@ export default function IdentityHub() {
 
         <div className="border border-slate-200 rounded-xl p-4">
           <h4 className="font-medium text-slate-800 mb-3">Increase Stake</h4>
-          <input 
-            type="number" 
-            placeholder="0.00" 
+          <input
+            type="number"
+            placeholder="0.00"
             value={stakeAmount}
             onChange={(e) => setStakeAmount(e.target.value)}
             className="w-full px-3 py-2 border border-slate-300 rounded-lg mb-3 text-sm"
             step="0.01"
             min="0.01"
           />
-          <button 
+          <button
             onClick={handleIncreaseStake}
             disabled={isStaking || !stakeAmount}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-medium 
-              py-2 rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-medium py-2 rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
           >
-            {isStaking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+            {isStaking ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Plus className="w-4 h-4" />
+            )}
             Add Stake
           </button>
         </div>
@@ -307,26 +346,29 @@ export default function IdentityHub() {
       <div className="bg-white rounded-xl shadow-md p-6">
         <h3 className="font-semibold text-slate-800 mb-4">Create Attestation</h3>
         <div className="space-y-4">
-          <input 
-            type="text" 
-            placeholder="Member Address (0x...)" 
+          <input
+            type="text"
+            placeholder="Member Address (0x...)"
             value={attesteeAddress}
             onChange={(e) => setAttesteeAddress(e.target.value)}
             className="w-full px-4 py-3 border border-slate-300 rounded-lg"
           />
-          <textarea 
-            placeholder="Evidence or reason for attestation..." 
+          <textarea
+            placeholder="Evidence or reason for attestation..."
             value={attestationEvidence}
             onChange={(e) => setAttestationEvidence(e.target.value)}
             className="w-full px-4 py-3 border border-slate-300 rounded-lg h-24"
           />
-          <button 
+          <button
             onClick={handleCreateAttestation}
             disabled={isAttesting || !attesteeAddress || !attestationEvidence}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-medium px-6 py-2 
-              rounded-lg transition-colors flex items-center gap-2"
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-medium px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
           >
-            {isAttesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+            {isAttesting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Plus className="w-4 h-4" />
+            )}
             Create Attestation
           </button>
           {attestSuccess && (
@@ -338,7 +380,9 @@ export default function IdentityHub() {
       </div>
 
       <div className="bg-white rounded-xl shadow-md p-6">
-        <h3 className="font-semibold text-slate-800 mb-4">Attestations Received ({attestations?.length || 0})</h3>
+        <h3 className="font-semibold text-slate-800 mb-4">
+          Attestations Received ({attestations?.length || 0})
+        </h3>
         <div className="space-y-3">
           {attestations && attestations.length > 0 ? (
             attestations.map((att: any, idx: number) => (
@@ -350,7 +394,9 @@ export default function IdentityHub() {
                       {att[0]?.slice(0, 6)}...{att[0]?.slice(-4)}
                     </span>
                   </div>
-                  <span className="text-xs text-slate-500">{formatTimestamp(att[2])}</span>
+                  <span className="text-xs text-slate-500">
+                    {formatTimestamp(att[2])}
+                  </span>
                 </div>
                 <p className="text-sm text-slate-700">{att[3]}</p>
                 {att[4] && (
@@ -361,7 +407,9 @@ export default function IdentityHub() {
               </div>
             ))
           ) : (
-            <p className="text-slate-500 text-center py-4">No attestations received yet</p>
+            <p className="text-slate-500 text-center py-4">
+              No attestations received yet
+            </p>
           )}
         </div>
       </div>
@@ -396,8 +444,7 @@ export default function IdentityHub() {
 
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full 
-              flex items-center justify-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
               <User className="w-8 h-8 text-white" />
             </div>
             <div className="flex-1">
@@ -418,17 +465,17 @@ export default function IdentityHub() {
         <div className="mb-6">
           <div className="flex gap-2 bg-white rounded-xl p-2 shadow-md">
             {[
-              { id: 'overview', label: 'Overview' },
-              { id: 'stake', label: 'Stake Management' },
-              { id: 'attestations', label: 'Attestations' },
+              { id: "overview", label: "Overview" },
+              { id: "stake", label: "Stake Management" },
+              { id: "attestations", label: "Attestations" },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-600 hover:bg-slate-50'
+                    ? "bg-blue-600 text-white"
+                    : "text-slate-600 hover:bg-slate-50"
                 }`}
               >
                 {tab.label}
@@ -438,9 +485,9 @@ export default function IdentityHub() {
         </div>
 
         <div>
-          {activeTab === 'overview' && <ProfileOverview />}
-          {activeTab === 'stake' && <StakeManagement />}
-          {activeTab === 'attestations' && <AttestationsView />}
+          {activeTab === "overview" && <ProfileOverview />}
+          {activeTab === "stake" && <StakeManagement />}
+          {activeTab === "attestations" && <AttestationsView />}
         </div>
       </div>
     </div>
