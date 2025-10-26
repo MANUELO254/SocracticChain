@@ -2,7 +2,7 @@
 [build]
   base = "socchain/packages/nextjs"
   command = "yarn install && yarn build"
-  publish = "socchain/packages/nextjs/.next"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20.18.3"
